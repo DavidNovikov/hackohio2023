@@ -98,8 +98,6 @@ while cap.isOpened():
 
                 if is_object_at_center(box, center_bbox):
                     # Object is within the center area
-                    #if len(track) >= center_duration_threshold:
-                    # The object has been within the center area for the threshold duration, consider it as inserted into the patient
                     if object_states[track_id]["state"] != "inside":
                         object_states[track_id] = {"state": "inside", "name": name}
 
@@ -124,7 +122,7 @@ while cap.isOpened():
             for name, count in total_object_counts.items():
                 print(f"{name}: {count}")
 
-        cv2.imshow("YOLOv8 Tracking", frame)
+        cv2.imshow("Tracking demo", frame)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
