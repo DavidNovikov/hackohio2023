@@ -179,6 +179,7 @@ class Results(SimpleClass):
         boxes=True,
         masks=True,
         probs=True,
+        label_filter=None  # Add label_filter parameter
     ):
         """
         Plots the detection results on an input RGB image. Accepts a numpy array (cv2) or a PIL Image.
@@ -245,7 +246,10 @@ class Results(SimpleClass):
                 c, conf, id = int(d.cls), float(d.conf) if conf else None, None if d.id is None else int(d.id.item())
                 name = ('' if id is None else f'id:{id} ') + names[c]
                 label = (f'{name} {conf:.2f}' if conf else name) if labels else None
-                annotator.box_label(d.xyxy.squeeze(), label, color=colors(c, True))
+                
+                # Check if the name is in the label_filter
+                if label_filter is None or name in label_filter:
+                    annotator.box_label(d.xyxy.squeeze(), label, color=colors(c, True))
 
         # Plot Classify results
         if pred_probs is not None and show_probs:

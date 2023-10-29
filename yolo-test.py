@@ -64,7 +64,7 @@ while cap.isOpened():
 
         # Run YOLOv8 tracking on the frame, persisting tracks between frames
         results = model.track(frame, persist=True, verbose=False)
-        frame = results[0].plot()
+        frame = results[0].plot(label_filter=object_names)
 
         for result in results:
             if result.boxes is None or result.boxes.id is None:
@@ -79,7 +79,7 @@ while cap.isOpened():
                 c, conf, id = int(d.cls), float(d.conf), None if d.id is None else int(d.id.item())
                 name = result.names[c]
 
-                if name is None:
+                if name is None or name not in object_names:
                     continue
 
                 total_object_counts[name] += 1
@@ -109,8 +109,8 @@ while cap.isOpened():
                                 print(f"Total {name} objects inside: {objects_inside[name]}")
                 else:
                     if object_states[track_id]["state"] != "outside":
-                        object_states[track_id] = {"state": "outside", "name": name} #set state to outside since not at center
-                        
+                        object_states[track_id] = {"state": "outside", "name": name}  # set state to outside since not at center
+
                         if previous_object_states[track_id] == "inside":
                             print(f"REMOVED: {name} [{track_id}]")
                             objects_inside[name] -= 1
@@ -135,6 +135,18 @@ while cap.isOpened():
                                 print(f"Total {object_state['name']} objects inside: {objects_inside[object_state['name']]}")
                             elif object_state["state"] == "outside":
                                 print(f"OUTSIDE: {object_state['name']} [{id}]")
+
+                    # When objects are removed, update the objects_inside dictionary
+                    if removed_elements.size > 0:
+                        for id in removed_elements:
+                            object_state = object_states[id]
+                            if object_state["state"] == "inside":
+                                print(f"REMOVED: {object_state['name']} [{id}]")
+                                objects_inside[object_state["name"]] -= 1
+                                print(f"Total {object_state['name']} objects inside: {objects_inside[object_state['name']]}")
+                            elif object_state["state"] == "outside":
+                                print(f"OUTSIDE: {object_state['name']} [{id}]")
+
 
             previous_track_ids = track_ids.copy()
 
