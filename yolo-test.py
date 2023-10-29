@@ -16,16 +16,16 @@ object_names = ["tissue", "scissors", "knife"]
 track_history = defaultdict(list)
 
 # Define a threshold for how long an object needs to be at the center to be considered inside the patient
-center_duration_threshold = 5
+#center_duration_threshold = 5
 
 # Create a dictionary to keep track of the state of each object
-object_states = defaultdict(lambda: {"state": "outside", "name": None})
+object_states = defaultdict(lambda: {"state": None, "name": None})
 
 # Create a dictionary to store the count of objects inside the patient
 objects_inside = {"tissue": 0, "scissors": 0, "knife": 0}
 
 # Create a dictionary to store the previous state of each object
-previous_object_states = defaultdict(lambda: "outside")
+previous_object_states = defaultdict(lambda: None)
 
 # Define a function to check if an object's bounding box overlaps with the center area
 def is_object_at_center(box, box2):
@@ -53,9 +53,9 @@ while cap.isOpened():
 
         # Draw the center area on the frame
         frame_shape = frame.shape
-        center_x = frame_shape[1] // 2
-        center_y = frame_shape[0] // 2
-        center_width = center_height = 150
+        center_x = frame_shape[1] // 2 - 30
+        center_y = frame_shape[0] // 2 - 30
+        center_width = center_height = 200
         center_bbox = (center_x, center_y, center_width, center_height)
         center_rect = (center_x - center_width // 2, center_y - center_height // 2, center_width, center_height)
 
@@ -98,15 +98,14 @@ while cap.isOpened():
 
                 if is_object_at_center(box, center_bbox):
                     # Object is within the center area
-                    if len(track) >= center_duration_threshold:
-                        # The object has been within the center area for the threshold duration, consider it as inserted into the patient
-                        if object_states[track_id]["state"] == "outside":
-                            object_states[track_id] = {"state": "inside", "name": name}
+                    #if len(track) >= center_duration_threshold:
+                    # The object has been within the center area for the threshold duration, consider it as inserted into the patient
+                    if object_states[track_id]["state"] != "inside":
+                        object_states[track_id] = {"state": "inside", "name": name}
 
-                            if previous_object_states[track_id] == "outside":
-                                print(f"INSERTED: {name} [{track_id}]")
-                                objects_inside[name] += 1
-                                print(f"Total {name} objects inside: {objects_inside[name]}")
+                        if previous_object_states[track_id] == "outside":
+                            print(f"INSERTED: {name} [{track_id}]")
+                            objects_inside[name] += 1
                 else:
                     if object_states[track_id]["state"] != "outside":
                         object_states[track_id] = {"state": "outside", "name": name}  # set state to outside since not at center
@@ -114,42 +113,11 @@ while cap.isOpened():
                         if previous_object_states[track_id] == "inside":
                             print(f"REMOVED: {name} [{track_id}]")
                             objects_inside[name] -= 1
-                            print(f"Total {name} objects inside: {objects_inside[name]}")
 
                 previous_object_states[track_id] = object_states[track_id]["state"]
 
-            if previous_track_ids is not None:
-                # Check if track_ids are not equal to previous_track_ids
-                if not np.array_equal(track_ids, previous_track_ids):
-
-                    added_elements = np.setdiff1d(track_ids, previous_track_ids)
-                    removed_elements = np.setdiff1d(previous_track_ids, track_ids)
-
-                    # When objects are added, update the objects_inside dictionary
-                    if added_elements.size > 0:
-                        for id in added_elements:
-                            object_state = object_states[id]
-                            if object_state["state"] == "inside":
-                                print(f"REMOVED: {object_state['name']} [{id}]")
-                                objects_inside[object_state["name"]] -= 1
-                                print(f"Total {object_state['name']} objects inside: {objects_inside[object_state['name']]}")
-                            elif object_state["state"] == "outside":
-                                print(f"OUTSIDE: {object_state['name']} [{id}]")
-
-                    # When objects are removed, update the objects_inside dictionary
-                    if removed_elements.size > 0:
-                        for id in removed_elements:
-                            object_state = object_states[id]
-                            if object_state["state"] == "inside":
-                                print(f"REMOVED: {object_state['name']} [{id}]")
-                                objects_inside[object_state["name"]] -= 1
-                                print(f"Total {object_state['name']} objects inside: {objects_inside[object_state['name']]}")
-                            elif object_state["state"] == "outside":
-                                print(f"OUTSIDE: {object_state['name']} [{id}]")
-
-
-            previous_track_ids = track_ids.copy()
-
+        print(f"objects_inside: {objects_inside}")
+        
         if not initial_objects_counted:
             initial_objects_counted = True
             print("Initial total object counts:")
