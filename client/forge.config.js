@@ -1,6 +1,6 @@
 module.exports = {
   packagerConfig: {
-    asar: true,
+    asar: true
   },
   rebuildConfig: {},
   makers: [
