@@ -7,7 +7,8 @@ const createWindow = () => {
   win = new BrowserWindow({
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
-    }
+    },
+    title: "Uncountable"
   })
 
   win.loadFile('index.html')
@@ -44,8 +45,8 @@ function startPythonChild() {
     let lines = data.toString().split('\n')
     lines = lines.filter(line => line.startsWith('>> '));
     lines = lines.map(line => line.substring(3))
-    console.log('Parced commands:', lines)
-    if (!pythonChildPort) {
+    console.log('Parsed commands:', lines)
+    if (!pythonChildPort && lines.length > 0) {
       pythonChildPort = parseInt(lines[0])
       win.webContents.send('pythonChildPort', pythonChildPort)
     }
