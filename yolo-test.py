@@ -28,8 +28,8 @@ objects_inside = {"tissue": 0, "scissors": 0, "knife": 0}
 previous_object_states = defaultdict(lambda: "outside")
 
 # Define a function to check if an object's bounding box overlaps with the center area
-def is_object_at_center(box1, box2):
-    x1, y1, w1, h1 = box1
+def is_object_at_center(box, box2):
+    x1, y1, w1, h1 = box
     x2, y2, w2, h2 = box2
 
     # Calculate the coordinates of the top-left and bottom-right corners of the boxes
@@ -75,9 +75,12 @@ while cap.isOpened():
             track_ids = result.boxes.id.cpu().numpy().astype(int)
 
             # Loop through tracked objects and check if they are within the center area
-            for box, track_id, d in zip(boxes, track_ids, reversed(result.boxes)):
+            for box, track_id, d in zip(boxes, track_ids, result.boxes):
                 c, conf, id = int(d.cls), float(d.conf), None if d.id is None else int(d.id.item())
                 name = result.names[c]
+
+                if name is None:
+                    continue
 
                 total_object_counts[name] += 1
 
@@ -100,13 +103,20 @@ while cap.isOpened():
                         if object_states[track_id]["state"] == "outside":
                             object_states[track_id] = {"state": "inside", "name": name}
 
-                            print(f"INSERTED: {name} [{track_id}]")
-                            objects_inside[name] += 1
+                            if previous_object_states[track_id] == "outside":
+                                print(f"INSERTED: {name} [{track_id}]")
+                                objects_inside[name] += 1
+                                print(f"Total {name} objects inside: {objects_inside[name]}")
                 else:
                     if object_states[track_id]["state"] != "outside":
-                        object_states[track_id] = {"state": "outside", "name": name}
-                        print(f"OUTSIDE: {name} [{track_id}]")
+                        object_states[track_id] = {"state": "outside", "name": name} #set state to outside since not at center
+                        
+                        if previous_object_states[track_id] == "inside":
+                            print(f"REMOVED: {name} [{track_id}]")
+                            objects_inside[name] -= 1
+                            print(f"Total {name} objects inside: {objects_inside[name]}")
 
+                previous_object_states[track_id] = object_states[track_id]["state"]
 
             if previous_track_ids is not None:
                 # Check if track_ids are not equal to previous_track_ids
@@ -122,6 +132,7 @@ while cap.isOpened():
                             if object_state["state"] == "inside":
                                 print(f"REMOVED: {object_state['name']} [{id}]")
                                 objects_inside[object_state["name"]] -= 1
+                                print(f"Total {object_state['name']} objects inside: {objects_inside[object_state['name']]}")
                             elif object_state["state"] == "outside":
                                 print(f"OUTSIDE: {object_state['name']} [{id}]")
 
@@ -130,7 +141,8 @@ while cap.isOpened():
         if not initial_objects_counted:
             initial_objects_counted = True
             print("Initial total object counts:")
-            print(total_object_counts)
+            for name, count in total_object_counts.items():
+                print(f"{name}: {count}")
 
         cv2.imshow("YOLOv8 Tracking", frame)
 
@@ -138,9 +150,9 @@ while cap.isOpened():
             break
 
 # Print the final object counts
-print(f"Total object count: {total_object_counts}")
-print(f"Total objects inside count: {objects_inside}")
-
-# Release the video capture object and close the display window
-cap.release()
-cv2.destroyAllWindows()
+print("Final total object counts:")
+for name, count in total_object_counts.items():
+    print(f"{name}: {count}")
+print("Final objects inside count:")
+for name, count in objects_inside.items():
+    print(f"{name}: {count}")
