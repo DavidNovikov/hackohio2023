@@ -5,4 +5,4 @@
 1. cd into /client
 1. run `npm install`
 1. run `npm run make`
-1. run `npm executable from /client/out/`
+1. run executable from /client/out/surgeio-win32-x64
