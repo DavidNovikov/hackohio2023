@@ -25,6 +25,9 @@ window.versions.onPythonChildPort((event, port) => {
     console.log('WebSocket connection closed')
     socket = null
   })
+  socket.addEventListener('error', (error) => {
+    console.error('WebSocket connection error:', error)
+  })
 })
 
 function send(command, data={}) {
@@ -40,20 +43,23 @@ function send(command, data={}) {
 }
 
 function messageRecieved(event) {
-  console.log('WebSocket message received:', event)
-  const json = JSON.parse(event.data)
-  const command = json.command
-  const data = json.data
-
-  switch (command) {
-    case 'itemInserted':
-      itemInserted(data)
-      break
-    case 'itemRemoved':
-      itemRemoved(data)
-      break
-    default:
-      console.warn(`Unknown command '${command}'`)
+  
+  for (const message of event.data) {
+    console.log('WebSocket messages received:', message)
+    const json = JSON.parse(event.data)
+    const command = json.command
+    const data = json.data
+  
+    switch (command) {
+      case 'itemInserted':
+        itemInserted(data)
+        break
+      case 'itemRemoved':
+        itemRemoved(data)
+        break
+      default:
+        console.warn(`Unknown command '${command}'`)
+    }
   }
 
 }
