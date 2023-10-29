@@ -102,14 +102,14 @@ while cap.isOpened():
                         object_states[track_id] = {"state": "inside", "name": name}
 
                         if previous_object_states[track_id] == "outside":
-                            print(f"INSERTED: {name} [{track_id}]")
+                            print(f"[EVENT] INSERTED: {name} [{track_id}]")
                             objects_inside[name] += 1
                 else:
                     if object_states[track_id]["state"] != "outside":
                         object_states[track_id] = {"state": "outside", "name": name}  # set state to outside since not at center
 
                         if previous_object_states[track_id] == "inside":
-                            print(f"REMOVED: {name} [{track_id}]")
+                            print(f"[EVENT] REMOVED: {name} [{track_id}]")
                             objects_inside[name] -= 1
 
                 previous_object_states[track_id] = object_states[track_id]["state"]
