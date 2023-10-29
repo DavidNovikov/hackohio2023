@@ -15,9 +15,6 @@ object_names = ["tissue", "scissors", "knife"]
 # Create a dictionary to store tracking history for each object
 track_history = defaultdict(list)
 
-# Define a threshold for how long an object needs to be at the center to be considered inside the patient
-#center_duration_threshold = 5
-
 # Create a dictionary to keep track of the state of each object
 object_states = defaultdict(lambda: {"state": None, "name": None})
 
