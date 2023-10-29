@@ -23,14 +23,47 @@ for (const item of items) {
   })
 }
 
+let socket = null
 window.versions.onPythonChildPort((event, port) => {
   console.log(`Python child process listening on port ${port}`)
-  const socket = new WebSocket(`ws://localhost:${port}`)
+  socket = new WebSocket(`ws://localhost:${port}`)
   socket.addEventListener('open', () => {
     console.log('WebSocket connection opened')
-    socket.send('Hello from client')
   })
   socket.addEventListener('message', (event) => {
     console.log('WebSocket message received:', event.data)
   })
+})
+
+function send(command, data={}) {
+  if (socket) {
+    const json = {
+      command: command,
+      data: data,
+    }
+    socket.send(JSON.stringify(json))
+  } else {
+    console.error('WebSocket connection not opened')
+  }
+}
+
+const buttonBegin = document.getElementById('button-begin')
+const buttonStop = document.getElementById('button-stop')
+
+buttonBegin.addEventListener('click', () => {
+  buttonBegin.disabled = true
+  buttonStop.disabled = false
+  buttonBegin.classList.add('disabled')
+  buttonStop.classList.remove('disabled')
+
+  send('beginProcedure')
+})
+
+buttonStop.addEventListener('click', () => {
+  buttonBegin.disabled = false
+  buttonStop.disabled = true
+  buttonBegin.classList.remove('disabled')
+  buttonStop.classList.add('disabled')
+
+  send('stopProcedure')
 })

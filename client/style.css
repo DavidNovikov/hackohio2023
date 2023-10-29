@@ -17,13 +17,24 @@ button {
   background-color: #aaf9fc;
   color: black;
   border: none;
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 7px;
+  padding: 12px;
   cursor: pointer;
   font-size: 1rem;
 }
-button.delete {
+button.danger {
   background-color: #ff7b7b;
+}
+button.primary {
+  background-color: #3bff8d;
+}
+button.disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.button-group button {
+  width: 45%;
 }
 
 .tag {
@@ -95,10 +106,25 @@ button.delete {
 .menu {
   background-color: #212121;
   height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .menu-info {
   margin: 20px;
+}
+
+.menu-buttons {
+  margin: 20px;
+  
+}
+
+.button-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .title {
