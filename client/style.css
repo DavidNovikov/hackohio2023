@@ -13,6 +13,10 @@ header {
   padding: 20px;
 }
 
+p {
+  font-size: 1.2rem;
+}
+
 button {
   background-color: #aaf9fc;
   color: black;
@@ -60,6 +64,7 @@ button.disabled {
   margin: 20px;
   width: 300px;
   min-height: 500px;
+  height: fit-content;
   position: relative;
   border-radius: 12px;
   background-color: #1E1E1E;
@@ -132,4 +137,26 @@ button.disabled {
   font-weight: bold;
   margin: 0;
   padding: 0;
+}
+
+.log {
+  margin: 20px;
+}
+
+.log-messages {
+  padding: 10px;
+  background-color: #1E1E1E;
+  height: 250px;
+  overflow-y: scroll;
+  transition: all 0.1s ease-in-out;
+}
+
+.log .log-messages span {
+  font-size: 0.8rem;
+}
+
+.collapsed {
+  height: 0;
+  padding: 0;
+  overflow: hidden;
 }

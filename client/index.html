@@ -22,57 +22,31 @@
 
         <header>
           <h1>Surge IO</h1>
-          <h2>Items in patient: <span class="tag">0</span></h2>
+          <h2>Items in patient: <span class="tag" id="items-total">0</span></h2>
         </header>
 
-        <div class="gallery">
+        <div class="gallery" id="gallery">
 
-          <div class="item">
+          <!-- <div class="item">
             <img src="../images\knife\knife1\WIN_20231028_16_48_09_Pro.jpg">
             <div class="item-content">
               <span class="title">Knife 1</span>
               <p>Inserted at 7:30pm</p>
             </div>
-          </div>
-
-          <div class="item">
-            <img src="../images\knife\knife1\WIN_20231028_16_48_09_Pro.jpg">
-            <div class="item-content">
-              <span class="title">Knife 2</span>
-              <p>Inserted at 7:30pm</p>
-            </div>
-          </div>
-
-          <div class="item">
-            <img src="../images\knife\knife1\WIN_20231028_16_48_09_Pro.jpg">
-            <div class="item-content">
-              <span class="title">Knife 3</span>
-              <p>Inserted at 7:30pm</p>
-            </div>
-          </div>
-
-          <div class="item">
-            <img src="../images\knife\knife1\WIN_20231028_16_48_09_Pro.jpg">
-            <div class="item-content">
-              <span class="title">Knife 4</span>
-              <p>Inserted at 7:30pm</p>
-            </div>
-          </div>
-
-          <div class="item">
-            <img src="../images\knife\knife1\WIN_20231028_16_48_09_Pro.jpg">
-            <div class="item-content">
-              <span class="title">Knife 5</span>
-              <p>Inserted at 7:30pm</p>
-            </div>
-          </div>
+          </div> -->
 
         </div>
       </div>  
       <div class="menu" id="menu">
         <div class="menu-info">
-          <p>Procedure started at 7:20pm</p>
-          <p>Total elapsed time: 1h 20m (80m)</p>
+          <p>Procedure <span id="procedure-started">not started</span></p>
+          <p>Total elapsed time: <span id="procedure-elapsed">0</span></p>
+        </div>
+
+        <div class="log">
+          <span class="title" id="log-title">Log</span>
+          <div class="collapsed log-messages" id="log-messages">
+          </div>
         </div>
 
         <div class="menu-buttons">

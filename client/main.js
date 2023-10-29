@@ -45,7 +45,7 @@ function startPythonChild() {
     lines = lines.filter(line => line.startsWith('>> '));
     lines = lines.map(line => line.substring(3))
     console.log('Parced commands:', lines)
-    if (!pythonChildPort) {
+    if (!pythonChildPort && lines.length > 0) {
       pythonChildPort = parseInt(lines[0])
       win.webContents.send('pythonChildPort', pythonChildPort)
     }
