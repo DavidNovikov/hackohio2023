@@ -7,10 +7,12 @@ from websockets.server import serve
 from yolo_demo import run_cv
 import threading
 from concurrent.futures import ThreadPoolExecutor
+# from queue import Queue
 
 class Client:
     def __init__(self, websocket):
         self.websocket = websocket
+        self.queue = asyncio.Queue()
 
     async def send(self, command, data={}):
         json_data = json.dumps({"command": command, "data": data})
@@ -23,8 +25,15 @@ class Client:
     async def send_item_removed(self, title):
         await self.send("itemRemoved", {"title": title})
 
-    def ping(self):
-        self.print("ping")
+    # async def stream_feed(self, image_blob):
+    #     # send image blob to client without waiting for response
+    #     # client will receive the blob in the "feed" event
+    #     await self.websocket.send(image_blob)
+
+    # async def transmit(self):
+    #     while True:
+    #         data = await self.queue.get()
+    #         await self.websocket.send(data)
 
     def print(self, str):
         sys.stdout.write(str + "\n")
@@ -39,6 +48,7 @@ async def send(websocket, command, data={}):
     json_data = json.dumps({"command": command, "data": data})
     await websocket.send(json_data)
 
+cv_thread = None
 async def echo(websocket):
     client = Client(websocket)
     async for message in websocket:
@@ -51,9 +61,14 @@ async def echo(websocket):
             loop = asyncio.get_event_loop()
             executor = ThreadPoolExecutor()
             loop.set_default_executor(executor)
-            thread = threading.Thread(target=run_cv_thread, args=(client,))
-            thread.start()
-        
+            cv_thread = threading.Thread(target=run_cv_thread, args=(client,))
+            cv_thread.start()
+
+        elif command == "endProcedure":
+            if cv_thread is not None:
+                cv_thread.join()
+                cv_thread = None
+
 def run_cv_thread(client):
     asyncio.run(run_cv(client))
 

@@ -3,16 +3,17 @@ import os
 import cv2
 import numpy as np
 from ultralytics import YOLO
+# from queue import Queue
 
 async def run_cv(client):
     # Load the YOLOv8 segmentation model
-    model = YOLO('./best2.pt')
+    model = YOLO('./yolov8m-seg.pt')
 
     # Open a video capture from the default camera (change the index if using a different camera)
     cap = cv2.VideoCapture(1)
 
     # Define the object classes to track
-    object_names = ["tissue", "scissor", "knife"]
+    object_names = ["tissue", "scissors", "knife"]
 
     # Create a dictionary to store tracking history for each object
     track_history = defaultdict(list)
@@ -21,7 +22,7 @@ async def run_cv(client):
     object_states = defaultdict(lambda: {"state": None, "name": None})
 
     # Create a dictionary to store the count of objects inside the patient
-    objects_inside = {"tissue": 0, "scissor": 0, "knife": 0}
+    objects_inside = {"tissue": 0, "scissors": 0, "knife": 0}
 
     # Create a dictionary to store the previous state of each object
     previous_object_states = defaultdict(lambda: None)
@@ -43,6 +44,7 @@ async def run_cv(client):
 
     inserted_item_index = 0
 
+    iteration = 0
     # Main loop for processing video frames
     while cap.isOpened():
         # Read a frame from the video
@@ -132,11 +134,17 @@ async def run_cv(client):
                 for name, count in total_object_counts.items():
                     print(f"{name}: {count}")
 
-            cv2.imshow("Tracking demo", frame)
+            # blob = cv2.imencode(".jpg", frame)[1].tostring()
+            # await client.stream_feed(blob)
+            # await client.queue.put(blob)
+
+            # show the frame
+            cv2.imshow("Frame", frame)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
+        iteration += 1
     # Print the final object counts
     print("Final total object counts:")
     for name, count in total_object_counts.items():

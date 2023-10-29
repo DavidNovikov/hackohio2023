@@ -17,6 +17,8 @@ window.versions.onPythonChildPort((event, port) => {
   socket = new WebSocket(`ws://localhost:${port}`)
   socket.addEventListener('open', () => {
     console.log('WebSocket connection opened')
+    buttonBegin.disabled = false
+    buttonBegin.classList.remove('disabled')
     keepAlive()
   })
   socket.addEventListener('message', messageRecieved)
@@ -51,7 +53,14 @@ function send(command, data={}) {
 
 function messageRecieved(event) {
   console.log(event)
-  handleMessage(event.data)
+  if (typeof event.data !== 'string') {
+    // video feed stream
+    const blob = event.data
+    const url = URL.createObjectURL(blob)
+    feed.src = url
+  } else {
+    handleMessage(event.data)
+  }
 }
 
 function handleMessage(message) {
@@ -214,3 +223,7 @@ logTitle.addEventListener('click', () => {
   logElement.classList.toggle('collapsed')
 })
 
+
+
+// feed
+const feed = document.getElementById('feed')

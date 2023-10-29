@@ -7,7 +7,8 @@ const createWindow = () => {
   win = new BrowserWindow({
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
-    }
+    },
+    title: "Uncountable"
   })
 
   win.loadFile('index.html')
