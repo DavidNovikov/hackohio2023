@@ -23,4 +23,11 @@ for (const item of items) {
   })
 }
 
-console.log(window)
+window.versions.onPythonChildPort((event, port) => {
+  console.log(`Python child process listening on port ${port}`)
+  const socket = new WebSocket(`ws://localhost:${port}`)
+  socket.addEventListener('open', () => {
+    console.log('WebSocket connection opened')
+    socket.send('Hello from client')
+  })
+})

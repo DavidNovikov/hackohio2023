@@ -5,5 +5,5 @@ contextBridge.exposeInMainWorld('versions', {
   chrome: () => process.versions.chrome,
   electron: () => process.versions.electron,
   ping: () => ipcRenderer.invoke('ping'),
-  onPythonChildPort: (port) => ipcRenderer.on('pythonChildPort', port)
+  onPythonChildPort: (callback) => ipcRenderer.on('pythonChildPort', callback)
 })

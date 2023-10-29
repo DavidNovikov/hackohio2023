@@ -37,12 +37,13 @@ app.on('window-all-closed', () => {
 function startPythonChild() {
   const process = child_process.spawn('python', ['../python/server.py'])
   process.stdout.on('data', (data) => {
+    console.log('Python child process stdout:', data.toString())
     let lines = data.toString().split('\n')
     lines = lines.filter(line => line.startsWith('>> '));
     lines = lines.map(line => line.substring(3))
-    lines.forEach(line => {
-      console.log(line)
-    })
+    console.log('Parced commands:', lines)
+    const port = parseInt(lines[0])
+    win.webContents.send('pythonChildPort', port)
   })
   console.log('Python child process started')
 }
