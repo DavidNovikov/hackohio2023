@@ -30,4 +30,7 @@ window.versions.onPythonChildPort((event, port) => {
     console.log('WebSocket connection opened')
     socket.send('Hello from client')
   })
+  socket.addEventListener('message', (event) => {
+    console.log('WebSocket message received:', event.data)
+  })
 })

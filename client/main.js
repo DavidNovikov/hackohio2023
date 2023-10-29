@@ -36,6 +36,10 @@ app.on('window-all-closed', () => {
 
 function startPythonChild() {
   const process = child_process.spawn('python', ['../python/server.py'])
+  process.stderr.on('data', (data) => {
+    console.error('Python child process stderr:', data.toString())
+  })
+  
   process.stdout.on('data', (data) => {
     console.log('Python child process stdout:', data.toString())
     let lines = data.toString().split('\n')
