@@ -17,14 +17,20 @@ objects_to_track = ["tissue", "scissors", "knife"]
 track_history = defaultdict(lambda: [])
 
 # Define a threshold for how long an object needs to be at the center to be considered inside the patient
-center_duration_threshold = 20
+center_duration_threshold = 5
 
 # Define the center area (a rectangle)
 center_area_color = (0, 0, 255)
 center_area_thickness = 2
 
 # Create a dictionary to keep track of the state of each object
-object_states = {}
+object_states = defaultdict(lambda: "outside")
+
+# Create a dictionary to keep track of the count of objects
+object_counts = defaultdict(int)
+
+# Create a dictionary to store the previous state of each object
+previous_object_states = defaultdict(lambda: "outside")
 
 # Define a function to check if an object's bounding box overlaps with the center area
 def is_object_at_center(box, center_rect):
@@ -55,11 +61,15 @@ while cap.isOpened():
         for result in results:
             if result.boxes is None or result.boxes.id is None:
                 continue
+
             boxes = result.boxes.xywh.cpu()
             track_ids = result.boxes.id.cpu().numpy().astype(int)
 
             # Loop through tracked objects and check if they are within the center area
-            for box, track_id in zip(boxes, track_ids):
+            for box, track_id, d in zip(boxes, track_ids, reversed(result.boxes)):
+                c, conf, id = int(d.cls), float(d.conf), None if d.id is None else int(d.id.item())
+                name = result.names[c]
+
                 track = track_history[track_id]
                 track.append(box)
 
@@ -76,25 +86,35 @@ while cap.isOpened():
                     # Object is within the center area
                     if len(track) >= center_duration_threshold:
                         # The object has been within the center area for the threshold duration, consider it inside the patient
-                        if track_id not in object_states or object_states[track_id] == "outside":
-                            print(f"Object with track ID {track_id} is potentially inside the patient.")
+                        if object_states[track_id] == "outside":
+                            print(f"{name} with track ID {track_id} is potentially inside the patient.")
+                            
+                            # Update object count and state
+                            object_counts[name] += 1
                             object_states[track_id] = "inside"
-                    elif track_id not in object_states or object_states[track_id] == "inside":
+                    elif object_states[track_id] == "inside":
                         # Object was inside but has not stayed long enough in the center
-                        print(f"Object with track ID {track_id} has returned to the center area but has not stayed long enough.")
+                        print(f"{name} with track ID {track_id} has returned to the center area but has not stayed long enough.")
 
                 else:
                     # Object is outside the center area
-                    if track_id not in object_states or object_states[track_id] == "inside":
-                        print(f"Object with track ID {track_id} has moved outside the patient's body.")
+                    if object_states[track_id] == "inside":
+                        print(f"{name} with track ID {track_id} has moved outside the patient's body.")
+                        
+                        # Update object count and state
+                        object_counts[name] -= 1
+                        if object_counts[name] < 0:
+                            object_counts[name] = 0
                         object_states[track_id] = "outside"
 
             cv2.imshow("YOLOv8 Tracking", frame)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
-    else:
-        break
+
+# Print the final object counts
+for name, count in object_counts.items():
+    print(f"Number of {name}s detected inside the patient's body: {count}")
 
 # Release the video capture object and close the display window
 cap.release()
