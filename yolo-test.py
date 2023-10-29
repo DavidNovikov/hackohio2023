@@ -38,6 +38,8 @@ def is_object_at_center(box, center_rect):
     rect_x, rect_y, rect_w, rect_h = center_rect
     return x < rect_x + rect_w and x + w > rect_x and y < rect_y + rect_h and y + h > rect_y
 
+
+initalObjectsCounted = False
 # Main loop for processing video frames
 while cap.isOpened():
     # Read a frame from the video
@@ -73,6 +75,10 @@ while cap.isOpened():
                 track = track_history[track_id]
                 track.append(box)
 
+                if not initalObjectsCounted:
+                    # Update object count
+                    object_counts[name] += 1
+
                 # Only leave a tracking line trail of up to 30
                 if len(track) > 30:
                     track.pop(0)
@@ -106,6 +112,13 @@ while cap.isOpened():
                         if object_counts[name] < 0:
                             object_counts[name] = 0
                         object_states[track_id] = "outside"
+
+            
+            if not initalObjectsCounted:
+                initalObjectsCounted = True
+                print("Initial object counts:")
+                for name, count in object_counts.items():
+                    print(f"{name}: {count}")
 
             cv2.imshow("YOLOv8 Tracking", frame)
 
