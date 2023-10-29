@@ -6,13 +6,13 @@ from ultralytics import YOLO
 
 async def run_cv(client):
     # Load the YOLOv8 segmentation model
-    model = YOLO('yolov8m-seg.pt')
+    model = YOLO('./best2.pt')
 
     # Open a video capture from the default camera (change the index if using a different camera)
     cap = cv2.VideoCapture(1)
 
     # Define the object classes to track
-    object_names = ["tissue", "scissors", "knife"]
+    object_names = ["tissue", "scissor", "knife"]
 
     # Create a dictionary to store tracking history for each object
     track_history = defaultdict(list)
@@ -21,7 +21,7 @@ async def run_cv(client):
     object_states = defaultdict(lambda: {"state": None, "name": None})
 
     # Create a dictionary to store the count of objects inside the patient
-    objects_inside = {"tissue": 0, "scissors": 0, "knife": 0}
+    objects_inside = {"tissue": 0, "scissor": 0, "knife": 0}
 
     # Create a dictionary to store the previous state of each object
     previous_object_states = defaultdict(lambda: None)
@@ -79,7 +79,7 @@ async def run_cv(client):
                 for box, track_id, d in zip(boxes, track_ids, result.boxes):
                     c, conf, id = int(d.cls), float(d.conf), None if d.id is None else int(d.id.item())
                     name = result.names[c]
-
+                    # client.print(f"box: {box}, track_id: {track_id}, name: {name}")
                     if name is None or name not in object_names:
                         continue
 

@@ -5,6 +5,8 @@ import sys
 import json
 from websockets.server import serve
 from yolo_demo import run_cv
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 class Client:
     def __init__(self, websocket):
@@ -39,9 +41,6 @@ async def send(websocket, command, data={}):
 
 async def echo(websocket):
     client = Client(websocket)
-    # await send(websocket, "itemInserted", {"imageSrc": "C:\\Users\\alexg\\Documents\\code\\hackohio2023\\images\\knife\\knife1\\WIN_20231028_16_48_13_Pro.jpg", "title": "knife"})
-    # await asyncio.sleep(5)
-    # await send(websocket, "itemRemoved", {"imageSrc": "C:\\Users\\alexg\\Documents\\code\\hackohio2023\\images\\knife\\knife1\\WIN_20231028_16_48_13_Pro.jpg", "title": "knife"})
     async for message in websocket:
         print_stdout(message)
 
@@ -49,9 +48,14 @@ async def echo(websocket):
         command = obj["command"]
         data = obj["data"]
         if command == "beginProcedure":
-            asyncio.get_event_loop().create_task(run_cv(client))
+            loop = asyncio.get_event_loop()
+            executor = ThreadPoolExecutor()
+            loop.set_default_executor(executor)
+            thread = threading.Thread(target=run_cv_thread, args=(client,))
+            thread.start()
         
-
+def run_cv_thread(client):
+    asyncio.run(run_cv(client))
 
 def find_available_port():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
