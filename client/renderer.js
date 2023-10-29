@@ -17,10 +17,10 @@ window.versions.onPythonChildPort((event, port) => {
   socket = new WebSocket(`ws://localhost:${port}`)
   socket.addEventListener('open', () => {
     console.log('WebSocket connection opened')
+    keepAlive()
   })
-  socket.addEventListener('message', (event) => {
-    messageRecieved(event)
-  })
+  socket.addEventListener('message', messageRecieved)
+
   socket.addEventListener('close', () => {
     console.log('WebSocket connection closed')
     socket = null
@@ -29,6 +29,13 @@ window.versions.onPythonChildPort((event, port) => {
     console.error('WebSocket connection error:', error)
   })
 })
+
+function keepAlive() {
+  if (socket) {
+      send('keepAlive')
+      setTimeout(keepAlive, 10000); 
+  }
+}
 
 function send(command, data={}) {
   if (socket) {
@@ -43,25 +50,26 @@ function send(command, data={}) {
 }
 
 function messageRecieved(event) {
-  
-  for (const message of event.data) {
-    console.log('WebSocket messages received:', message)
-    const json = JSON.parse(event.data)
-    const command = json.command
-    const data = json.data
-  
-    switch (command) {
-      case 'itemInserted':
-        itemInserted(data)
-        break
-      case 'itemRemoved':
-        itemRemoved(data)
-        break
-      default:
-        console.warn(`Unknown command '${command}'`)
-    }
-  }
+  console.log(event)
+  handleMessage(event.data)
+}
 
+function handleMessage(message) {
+  console.log('WebSocket messages received:', message)
+  const json = JSON.parse(message)
+  const command = json.command
+  const data = json.data
+
+  switch (command) {
+    case 'itemInserted':
+      itemInserted(data)
+      break
+    case 'itemRemoved':
+      itemRemoved(data)
+      break
+    default:
+      console.warn(`Unknown command '${command}'`)
+  }
 }
 
 const buttonBegin = document.getElementById('button-begin')

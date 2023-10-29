@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import asyncio
 import socket
@@ -14,12 +13,16 @@ class Client:
     async def send(self, command, data={}):
         json_data = json.dumps({"command": command, "data": data})
         await self.websocket.send(json_data)
+        self.print(f"sent {command} {data}")
 
     async def send_item_inserted(self, image_src, title):
         await self.send("itemInserted", {"imageSrc": image_src, "title": title})
 
     async def send_item_removed(self, title):
         await self.send("itemRemoved", {"title": title})
+
+    def ping(self):
+        self.print("ping")
 
     def print(self, str):
         sys.stdout.write(str + "\n")
@@ -46,8 +49,9 @@ async def echo(websocket):
         command = obj["command"]
         data = obj["data"]
         if command == "beginProcedure":
-            await run_cv(client)
+            asyncio.get_event_loop().create_task(run_cv(client))
         
+
 
 def find_available_port():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -107,7 +107,7 @@ async def run_cv(client):
                                 cwd = os.getcwd()
                                 path = f"{cwd}/frames/{inserted_item_index}.jpg"
                                 cv2.imwrite(path, frame)
-                                print(f"objects_inside: {objects_inside}")
+                                client.print(f"objects_inside: {objects_inside}")
                                 client.print(f"[EVENT] INSERTED: {name} [{track_id}], {path}")
                                 await client.send_item_inserted(path, name)
 
@@ -118,7 +118,7 @@ async def run_cv(client):
                             object_states[track_id] = {"state": "outside", "name": name}  # set state to outside since not at center
 
                             if previous_object_states[track_id] == "inside":
-                                print(f"objects_inside: {objects_inside}")
+                                client.print(f"objects_inside: {objects_inside}")
                                 client.print(f"[EVENT] REMOVED: {name} [{track_id}]")
                                 await client.send_item_removed(name)
                                 objects_inside[name] -= 1
