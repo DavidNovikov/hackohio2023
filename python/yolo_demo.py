@@ -5,15 +5,18 @@ import numpy as np
 from ultralytics import YOLO
 # from queue import Queue
 
+scisors_name = "scissor"
+
 async def run_cv(client):
     # Load the YOLOv8 segmentation model
-    model = YOLO('./yolov8m-seg.pt')
+    # model = YOLO('./yolov8m-seg.pt')
+    model = YOLO('./best4.pt')
 
     # Open a video capture from the default camera (change the index if using a different camera)
     cap = cv2.VideoCapture(1)
 
     # Define the object classes to track
-    object_names = ["tissue", "scissors", "knife"]
+    object_names = ["tissue", scisors_name, "knife"]
 
     # Create a dictionary to store tracking history for each object
     track_history = defaultdict(list)
@@ -22,7 +25,7 @@ async def run_cv(client):
     object_states = defaultdict(lambda: {"state": None, "name": None})
 
     # Create a dictionary to store the count of objects inside the patient
-    objects_inside = {"tissue": 0, "scissors": 0, "knife": 0}
+    objects_inside = {"tissue": 0, scisors_name: 0, "knife": 0}
 
     # Create a dictionary to store the previous state of each object
     previous_object_states = defaultdict(lambda: None)
